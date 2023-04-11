@@ -2,8 +2,6 @@
 
 ## A Tableaux System for Dolev-Yao Multi-Agent Epistemic Logic - Soundness, Completeness and Termination Argument
 
----
-
 ### Authors
 
     Luiz C. F. Fernandez and Mario R. F. Benevides
