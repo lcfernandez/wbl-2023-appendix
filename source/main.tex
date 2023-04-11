@@ -1,0 +1,266 @@
+\documentclass[submission,copyright,creativecommons]{eptcs}
+\providecommand{\event}{WBL'23} % Name of the event you are submitting to
+%\usepackage{breakurl}             % Not needed if you use pdflatex only.
+\usepackage[numbers,sort]{natbib} % \citet e citar numerado/ordenado
+\usepackage[mathscr]{eucal} % \mathscr
+\usepackage[all]{xy} % \xymatrix
+\usepackage{float} % Posição da figura ([H])
+\usepackage{subfigure} % Subfiguras dos exemplos
+\usepackage{amsmath} % Deduções
+\usepackage{tabto} % \NumTabs
+\usepackage{amssymb} % Símbolos matemáticos (\vDash)
+\usepackage{amsthm} % Teoremas (\begin{proof}}
+
+\newtheorem{example}{Example}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{technique}[definition]{Technique}
+
+\title{A Tableaux System for $\mathscr{S}5_{DY}$ - Soundness, Completeness and Termination Argument}
+
+\author{Luiz C. F. Fernandez
+    \institute{PESC/Coppe\\
+    Universidade Federal do Rio de Janeiro (UFRJ)\\
+    Rio de Janeiro - RJ}
+    \email{lcfernandez@cos.ufrj.br}
+    \and
+    Mario R. F. Benevides
+    \institute{Instituto de Computação\\
+    Universidade Federal Fluminense (UFF)\\
+    Niterói - RJ}
+    \email{mario@ic.uff.br}
+}
+
+\def\titlerunning{A Tableaux System for $\mathscr{S}5_{DY}$ - Soundness, Completeness and Termination Argument}
+\def\authorrunning{Luiz C. F. Fernandez \& Mario R. F. Benevides}
+
+\begin{document}
+    \maketitle
+    
+    \begin{abstract}
+        This work is an appendix to the WBL'23 submission \emph{A Tableaux System for Dolev-Yao Multi-Agent Epistemic Logic}, a theorem prover for the Dolev-Yao Multi-Agent Epistemic Logic. Our prover is based on tableaux method and we prove it sound and complete. Finally, we provide a termination argument for our method.
+    \end{abstract}
+
+
+
+    \section{Soundness}
+        \label{sec:dymaelTableauxSoundness}
+        
+        The soundness proof for our method is inspired by Costa \cite{IntroducaoLogicaModalAplicadaComputacao}. First, we need some definitions:
+        
+        \begin{definition}
+            \label{def:dymaelTableauxProperties}
+        
+            Let $\Gamma$ be a set of formulae:
+            
+                \begin{enumerate}
+                    \item we denote $s \Vdash \Gamma$ to represent $s \Vdash \alpha$, for all $\alpha \in \Gamma$;
+                    
+                    \item\label{property:dymaelTableauxModel} we say $\Gamma$ is satisfiable if there exists a model $\mathscr{M}$ and some possible state $s \in S$ such that $s \Vdash \Gamma$;
+                    
+                    \item\label{property:dymaelTableauxBranch} a tableau branch is satisfiable if the set of all its formulae is satisfiable. A tableau is satisfiable if at least one branch is satisfiable.
+                \end{enumerate}
+        \end{definition}
+        
+        \begin{lemma}
+            The rules of tableaux method preserve satisfiability. That is, if a tableau $\mathscr{T}$ is satisfiable then the tableau resulting from the application of a rule to $\mathscr{T}$ is satisfiable.
+        
+        \begin{proof}
+            Let $\mathscr{T}$ be a satisfiable tableau. By property \ref{property:dymaelTableauxBranch} of Definition \ref{def:dymaelTableauxProperties}, $\mathscr{T}$ has at least one satisfiable branch, although it could have unsatisfiable ones. So, or the rule is applied to a satisfiable branch or to an unsatisfiable one.
+        
+            \textbf{First case:} if the rule is applied to an unsatisfiable branch, each originally satisfiable branch remains unchanged. Therefore, the tableau resulting from the application of a rule is satisfiable.
+        
+            \textbf{Second case:} if the rule is applied to a satisfiable branch $\theta$, which consists of a set of formulae $\Gamma$ and some specific formulae $\gamma$ and $\delta$ which the rule is applied. As $\theta$ is satisfiable, by property \ref{property:dymaelTableauxModel} of Definition \ref{def:dymaelTableauxProperties}, there exists a model $\mathscr{M}$ and a possible state $s \in S$ such that $s \Vdash \Gamma$, in particular, $s \Vdash \gamma$ and $s \Vdash \delta$. Let's $\theta'$ be the new branch obtained by the application of an inference rule to $\theta$. We have the following cases for each possible structure of $\gamma$ and/or $\delta$:
+        
+            \begin{itemize}
+                \item for $\gamma$ or $\delta$ of type $\neg \neg \alpha$, $\alpha \land \beta$, $\neg (\alpha \lor \beta)$, $\neg (\alpha \to \beta)$, $\alpha \lor \beta$, $\neg (\alpha \land \beta)$, $\alpha \to \beta$, $K_a \alpha$ or $\neg K_a \alpha$, the proof can be found in tableaux for modal logics literature \cite{fitting1986proofmethods, IntroducaoLogicaModalAplicadaComputacao}.
+                
+                \item R$_\text{Dec}$: for $\gamma$ of type $m$ and for $\delta$ of type $k$, where $m, k \in \Gamma$, since $s \Vdash m$ and $s \Vdash k$, that is, $s \Vdash m \land k$, by the soundness of axiom 6 of Section 3.1 of the original submission, we have $s \Vdash \{m\}_k$. Therefore, $\theta'$ is satisfiable.
+        
+                \item R$_\text{Enc}^\neg$: for $\gamma$ or $\delta$ of type $\neg \{m\}_k$ and $s \Vdash \neg  \{m\}_k$. By the contrapositive of axiom 6 of Section 3.2 of the original submission and its soundness, we have $s \Vdash \neg (m \land k)$ and also $s \Vdash \neg m \lor  \neg k$. Suppose $s \Vdash \neg m $, then $\theta'$ is satisfiable. Suppose $s \Vdash \neg k $, then $\theta'$ is also satisfiable. Therefore, $\theta'$ is satisfiable.
+                
+                \item the cases for rules R$_\text{Pair}$ and R$_\text{Pair}^\neg$ are analogous to the cases for rules R$_\text{Dec}$ and R$_\text{Enc}^\neg$, respectively, but using axiom 8 of Section 3.1 of the original submission.
+            \end{itemize} \end{proof}\end{lemma}
+        
+        The soundness of our tableaux method follows straightforward from the above lemma. If a formula $\neg \alpha$ has a closed tableaux, then it is unsatisfiable. Therefore $\alpha$ must be a valid formula.
+        
+        
+        
+    \section{Completeness}
+        \label{sec:dymaelTableauxCompleteness}
+    
+        Smullyan \cite{smullyan1968fol} proved the completeness of tableaux method for classical logic based on the construction of a completed tableaux and showing that when we cannot build a closed tableau for a formula $\neg \alpha$, we have what is necessary to build a counter-model for $\alpha$, therefore, $\alpha$ is not valid. Then, Fitting \cite{fitting1986proofmethods} extended this approach by adding the notion of \emph{prefixed tableaux}, with the definition of a \emph{completed tableau} and proving that if a formula $\alpha$ is valid, then every completed tableau for $\neg \alpha$ is closed. The completeness proof provided by Costa \cite{IntroducaoLogicaModalAplicadaComputacao} is inspired by this approach and is also the base for the proof below.
+        Let's begin with some definitions:
+        
+        \begin{definition}
+            Formulae of the form $X \land Y$, $\neg (X \lor Y)$, $\neg (X \to Y)$, $\neg \neg X$, $(m, n)$ or occurrences of $m$ and $k$ are called type-$\alpha$ formulae, while every formulae of the form $X \lor Y$, $\neg (X \land Y)$, $X \to Y$, $\neg (m, n)$ or $\neg \{m\}_k$ are called type-$\beta$ formulae. The components $\alpha_1$ and $\alpha_2$ from a type-$\alpha$ formula and the components $\beta_1$ and $\beta_2$ from a type-$\beta$ formula are given in the tables bellow:
+            
+            \begin{table}[H]
+            \parbox{.45\linewidth}{
+                \centering
+                \begin{tabular}{c|c|c}
+                    $\alpha$ & $\alpha_1$ & $\alpha_2$ \\
+                    \hline
+                    $X \land Y$ & $X$ & $Y$ \\
+                    $\neg (X \lor Y)$ & $\neg X$ & $\neg Y$ \\
+                    $\neg (X \to Y)$ & $X$ & $\neg Y$ \\
+                    $\neg \neg X$ & $X$ & $X$ \\
+                    $(m,n)$ & $m$ & $n$ \\
+                    $\genfrac{}{}{0pt}{}{}{\genfrac{}{}{0pt}{0}{m}{k}}$ & $\{m\}_k$ & $\{m\}_k$ \\
+                \end{tabular}
+                \caption{Components of a type-$\alpha$ formula}
+                \label{tableauxS5dyComponentsAlpha} }
+           \hfill
+            \parbox{.45\linewidth}{
+                \centering
+                \begin{tabular}{c|c|c}
+                    $\beta$ & $\beta_1$ & $\beta_2$ \\
+                    \hline
+                    $X \lor Y$ & $X$ & $Y$ \\
+                    $\neg (X \land Y)$ & $\neg X$ & $\neg Y$ \\
+                    $X \to Y$ & $\neg X$ & $Y$ \\
+                    $\neg (m,n)$ & $\neg m$ & $\neg n$ \\
+                    $\neg \{m\}_k$ & $\neg m$ & $\neg k$ \\
+                \end{tabular}
+                \caption{Components of a type-$\beta$ formula}
+                \label{tableauxS5dyComponentsBeta} }
+            \end{table}
+        \end{definition}
+        
+        \begin{definition}
+            \label{s5dyTableauxComplete}
+        
+            A branch $\theta$ of a tableau $\sigma$ is called \emph{complete} if it satisfies the following conditions (where $\Sigma$ is a set of formulae of $\theta$ and $\gamma$ a specific formula):
+            
+            \begin{enumerate}
+                \item\label{s5dyTableauxCompleteAlpha} if $(\sigma, \alpha) \in \Sigma$, then $(\sigma, \alpha_1) \in \Sigma$ and $(\sigma, \alpha_2) \in \Sigma$;
+                
+                \item\label{s5dyTableauxCompleteBeta} if $(\sigma, \beta) \in \Sigma$, then $(\sigma, \beta_1) \in \Sigma$ or $(\sigma, \beta_2) \in \Sigma$;
+                
+                \item\label{s5dyTableauxCompleteK} if $(\sigma, K_a \gamma) \in \Sigma$, then $(\sigma', \gamma) \in \Sigma$ for every tableau $\sigma'$ that occurs in $\Sigma$ and is accessible from $\sigma$;
+                
+                \item\label{s5dyTableauxCompleteNK} if $(\sigma, \neg K_a \gamma) \in \Sigma$, then $(\sigma', \gamma) \in \Sigma$ for some tableau $\sigma'$ that is accessible from $\sigma$;
+                
+                \item\label{s5dyTableauxCompleteBranch} every branch of any tableau which is accessible from $\theta$ is complete or closed as well.
+            \end{enumerate}
+        \end{definition}
+        
+        \begin{definition}
+            We say that a tableau $\mathscr{T}$ is \emph{completed} if every branch of $\sigma$ is complete or closed.
+        \end{definition}
+        
+        So, if a branch $\theta$ of a tableau $\mathscr{T}$ is \emph{complete} and \emph{open}, then we have at least one open branch (that is also complete) per subordinated tableaux to $\theta$.
+        
+        \begin{theorem}
+            \label{tableauxS5dyModel}
+            
+            Every complete and open branch of a tableau is satisfiable.
+        \end{theorem}
+        
+        \begin{proof}
+            Let $\theta$ be a complete and open branch of a tableau $\mathscr{T}$ and $\Sigma$ be a set of formulae of $\theta$ and of the tableaux $\mathscr{T}_1, \mathscr{T}_2, \dots$ (which are recursively subordinated to $\theta$). We construct a model $\mathscr{M}$ where $S$ is the set of tableaux $\{\mathscr{T}, \mathscr{T}_1, \mathscr{T}_2, \dots\}$, $\sim_{a}$ is built from the pairs $(\mathscr{T}_1, \mathscr{T}_2)$, such that $\mathscr{T}_2$ is subordinated to $\mathscr{T}_1$ and satisfying the following conditions, where $E$ is an expression and the prefixes $\sigma, \sigma_1, \sigma_2, \dots$ are associated to $\{\mathscr{T}, \mathscr{T}_1, \mathscr{T}_2, \dots\}$, respectively:
+        
+            \begin{enumerate}
+                \item if $(\sigma, E) \in \Sigma$, then $V(\sigma, E) = T$;
+                \item if $(\sigma, \neg E) \in \Sigma$, then $V(\sigma, E) = F$;
+                \item if $(\sigma, E) \not \in \Sigma$ and $(\sigma, \neg E) \not \in \Sigma$, then $V(\sigma, E) = T$ can have any value. Let's choose $F$ by default.
+            \end{enumerate}
+        
+            Now, for any $(\sigma, \gamma) \in \Sigma$, we have $s \Vdash \gamma$, where $\gamma$ is a formula and $s$ a possible state associated to $\sigma$. According to $\gamma$ structure:
+        
+            \begin{itemize}
+                \item for $(\sigma, p), (\sigma, \alpha), (\sigma, \beta), (\sigma, K_a \gamma$) and $(\sigma, \neg K_a \gamma)$ the proof is found in \cite{IntroducaoLogicaModalAplicadaComputacao}. We only show the case for the new rules presented in Section 4 of the original submission;
+                
+                \item The pair $(\sigma, \{m\}_k) \in \Sigma$, for some prefix $\sigma$. By condition \ref{s5dyTableauxCompleteAlpha} of Definition \ref{s5dyTableauxComplete}, we have $(\sigma, m) \in \Sigma$ and $(\sigma,k) \in \Sigma$ and by the induction hypothesis $s \Vdash m$ and $s \Vdash k$ and also $s \Vdash m \land k$, by the soundness of axiom axiom 6 of Section 3.1 of the original submission, we have $s \Vdash \{m\}_k$;
+                
+                \item The pair $(\sigma, \neg \{m\}_k) \in \Sigma$, for some prefix $\sigma$.  By condition \ref{s5dyTableauxCompleteBeta} of Definition \ref{s5dyTableauxComplete}, we have $(\sigma, \neg m) \in \Sigma$ or $(\sigma, \neg k) \in \Sigma$ and by the induction hypothesis $s \Vdash \neg m$ or $s \Vdash \neg k$ and also $s \Vdash \neg m \lor \neg k$ and $s \Vdash \neg (m \land  k)$, by the soundness of the contrapositive of axiom 6 of Section 3.1 of the original submission, we have $s \Vdash \neg \{m\}_k$;
+            
+                \item the cases for rules R$_\text{Pair}$ and R$_\text{Pair}^\neg$ are analogous to the cases for rules R$_\text{Dec}$ and R$_\text{Enc}^\neg$, respectively, but using axiom 8 of Section 3.1 of the original submission.
+            \end{itemize}
+        
+            Therefore, our model satisfies $\Sigma$.
+        \end{proof}
+        
+        \begin{theorem}
+            If a formula $\gamma$ is valid, then $\gamma$ has a proof by tableaux method.
+        \end{theorem}
+        
+        \begin{proof}
+            Let $\mathscr{T}$ be a completed tableau, started with $\neg \gamma$. If it is open, then $\neg \gamma$ is satisfiable by theorem \ref{tableauxS5dyModel}. So, $\gamma$ cannot be valid. Therefore, if $\gamma$ is valid, then $\mathscr{T}$ is closed and $\gamma$ has a proof by tableaux method.
+        \end{proof}
+        
+        
+        
+    \section{Termination property}
+        \label{sec:dymaelTableauxTermination}
+        
+        For the tableaux rules presented in Section 2.3 of the original submission, Massacci \cite{massacci2000singlesteptableaux} provides the termination argument below, adapted for our semantics.
+        
+        \subsection{Classical and modal rules}
+            \label{subsec:dymaelTableauxTerminationClassicModalRules}
+        
+            To guarantee the termination of the proof search it's used the ``loop checking'' approach, a combination of techniques to apply any rule only after check if it was not applied already to the same antecedent. First we need some definitions:
+            
+            \begin{definition}
+                \label{def:dymaelTableauxTerminationReduced}
+            
+                In a branch $\theta$ of a tableau $\sigma$, a prefixed formula $(\sigma, \gamma)$ is \emph{reduced} for a rule in $\theta$:
+            
+                \begin{itemize}
+                    \item if the rule generates $(\sigma', \gamma')$ and $(\sigma', \gamma')$ is in $\theta$; or
+                    
+                    \item if the rule splits the tableau into $(\sigma_1, \gamma_1)$ and $(\sigma_2, \gamma_2)$ and at least one of those is in $\theta$.
+                \end{itemize}
+            
+                The formula $(\sigma, \gamma)$ is \emph{fully reduced} in $\theta$ if it is reduced for all applicable rules and $\sigma$ is (fully) reduced if all prefixed formula $(\sigma, \gamma)$ are (fully) reduced as well.
+            \end{definition}
+        
+            So, for tableaux method for logic $\mathcal{K}$, the following technique is sufficient to terminate:
+        
+            \begin{technique}
+                \label{tech:dymaelTableauxReduced}
+            
+                Apply a rule to a prefixed formula $(\sigma, \gamma)$ in $\theta$ only if the formula is not already reduced according to Definition \ref{def:dymaelTableauxTerminationReduced}, except for the knowledge operator.
+            \end{technique}
+
+            But for our case, the ``loop checking'' concept is required. Let's begin with the definition of a \emph{copy} of a prefix:
+            
+            \begin{definition}
+                A prefix $\sigma$ is a copy of a prefix $\sigma_0$ for branch $\theta$ if for every formula $\gamma$ one has $(\sigma, \gamma) \in \theta$ iff $(\sigma_0, \gamma) \in \theta$.
+            \end{definition}
+            
+            Now we define what is a \emph{$\pi$-reduced} prefix:
+            
+            \begin{definition}
+                A prefix is $\pi$-reduced in $\theta$ if it is reduced for all rules except R$_\pi$. A branch $\theta$ is $\pi$-completed if:
+            
+                \begin{itemize}
+                    \item all prefixes are $\pi$-reduced in $\theta$;
+                    
+                    \item for every $\sigma$ that is not fully reduced there is a fully reduced copy $\sigma_0$ shorter than $\sigma$.
+                \end{itemize}
+            \end{definition}
+            
+            So, the idea is to restrict the usage of R$_\pi$ to formulae belonging to copies. The following technique together with Technique \ref{tech:dymaelTableauxReduced} prove that we will always have a $\pi$-completed branch:
+            
+            \begin{technique}
+                Select the prefixed formulae with the shortest prefix.
+            \end{technique}
+            
+            As we have a $\pi$-completed branch, the next technique guarantees termination:
+
+            \begin{technique}
+                Check if the prefix of a $\pi$-formula is not a copy of a shorter prefix before reducing it.
+            \end{technique}
+
+        \subsection{Dolev-Yao Multi-Agent Epistemic Logic rules}
+            As rules R$_\text{Dec}$, R$_\text{Enc}^\neg$, R$_\text{Pair}$, R$_\text{Pair}^\neg$ always yield a smaller conclusion than the premises, that is, they are considered \emph{analytic} rules, the argument explained in Section \ref{subsec:dymaelTableauxTerminationClassicModalRules} is not interfered.
+
+
+
+    \nocite{*}
+    \bibliographystyle{eptcs}
+    \bibliography{references}
+
+\end{document}
